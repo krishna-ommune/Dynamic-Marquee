@@ -117,53 +117,87 @@ function dm_marquee_shortcode() {
         return '<p>No links available. Add some links in the admin panel.</p>';
     }
 
-    $content = '
+$content = '
     <style>
-        marquee:hover {
+        .marquee-wrapper {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 30px;
+            white-space: nowrap;
+        }
+        .marquee-content {
+            display: inline-block;
+            white-space: nowrap;
+        }
+		    .marquee-content:hover {
             animation-play-state: paused;
             -webkit-animation-play-state: paused;
         }
-		.elementor-shortcode i.fa.fa-circle {
-			color: #fff;
-			font-size: 10px;
-			padding: 0px 12px
-		}
-		.flight-color-link{
-			font-family: "Plus Jakarta Sans", Sans-serif;
-			font-size: 16px;
-			font-weight: 400;
-			color:#fff;
-		}
-		.flight-icon-color{
-			rotate: -50deg;
-			color: #FFD600;
-		}
-		.marquee {
-		  position: relative;
-		  width: 100vw;
-		  max-width: 100%;
-		  height: 200px;
-		  overflow-x: hidden;
-		}
-		@keyframes marquee {
-		  from { transform: translateX(0); }
-		  to { transform: translateX(-50%); }
-		}
-
+        .marquee-content a {
+            display: inline-block;
+            margin-right: 0px;
+            text-decoration: none;
+        }
+        .elementor-shortcode i.fa.fa-circle {
+            color: #fff;
+            font-size: 10px;
+            padding: 0px 12px;
+        }
+        .flight-color-link {
+            font-family: "Plus Jakarta Sans", Sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            color: #fff;
+        }
+        .flight-icon-color {
+            rotate: -50deg;
+            color: #FFD600;
+        }
     </style>
-    <marquee onmouseover="this.stop();" onmouseout="this.start();" direction="left" loop="0">';
-    foreach ($links as $link) {
-        $text = esc_html($link['text']);
-        $url = esc_url($link['url']);
-        $content .= "
-        <a href=\"{$url}\">
-            <i class=\"fa fa-fighter-jet flight-icon-color\" aria-hidden=\"true\"></i>
-            <span class=\"flight-color-link\">{$text}</span>
-			<i class=\"fa fa-circle\" aria-hidden=\"true\"></i>
-        </a>";
-    }
-    $content .= '</marquee>';
+    <div class="marquee-wrapper" id="marquee-wrapper">
+        <div class="marquee-content" id="marquee-content">';
+foreach ($links as $link) {
+    $text = esc_html($link['text']);
+    $url = esc_url($link['url']);
+    $content .= "
+            <a href=\"{$url}\">
+                <i class=\"fa fa-fighter-jet flight-icon-color\" aria-hidden=\"true\"></i>
+                <span class=\"flight-color-link\">{$text}</span>
+                <i class=\"fa fa-circle\" aria-hidden=\"true\"></i>
+            </a>";
+}
+$content .= '
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const marqueeWrapper = document.getElementById("marquee-wrapper");
+            const marqueeContent = document.getElementById("marquee-content");
 
-    return $content;
+            // Clone content for seamless scrolling
+            const clone = marqueeContent.cloneNode(true);
+            marqueeWrapper.appendChild(clone);
+
+            let offset = 0;
+
+            function scrollMarquee() {
+                offset -= 1; // Adjust speed by changing this value
+                marqueeContent.style.transform = `translateX(${offset}px)`;
+                clone.style.transform = `translateX(${offset}px)`;
+
+                // Reset offset for continuous loop
+                if (Math.abs(offset) >= marqueeContent.scrollWidth) {
+                    offset = 0;
+                }
+
+                requestAnimationFrame(scrollMarquee);
+            }
+
+            scrollMarquee(); // Start scrolling
+        });
+    </script>';
+
+return $content;
 }
 add_shortcode('dynamic_marquee', 'dm_marquee_shortcode');
